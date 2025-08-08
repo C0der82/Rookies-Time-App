@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/Rookies-Time-App/static/css/main.20534854.css",
+    "main.js": "/Rookies-Time-App/static/js/main.dabeff28.js",
+    "static/js/453.5d7180d8.chunk.js": "/Rookies-Time-App/static/js/453.5d7180d8.chunk.js",
+    "static/media/rookie-rockstars-logo.png": "/Rookies-Time-App/static/media/rookie-rockstars-logo.6eef80ea59e4133c78c9.png",
+    "index.html": "/Rookies-Time-App/index.html",
+    "main.20534854.css.map": "/Rookies-Time-App/static/css/main.20534854.css.map",
+    "main.dabeff28.js.map": "/Rookies-Time-App/static/js/main.dabeff28.js.map",
+    "453.5d7180d8.chunk.js.map": "/Rookies-Time-App/static/js/453.5d7180d8.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.20534854.css",
+    "static/js/main.dabeff28.js"
+  ]
+}
