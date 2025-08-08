@@ -22,6 +22,7 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
   const [newPasswordInput, setNewPasswordInput] = useState('');
   const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
   const [passwordStatus, setPasswordStatus] = useState('');
+  const mustChangePassword = currentUser?.mustChangePassword;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,11 +45,11 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
       if (currentUser) {
         const savedStaff = JSON.parse(localStorage.getItem('rookiesTimeStaff') || '[]');
         const updatedUser = savedStaff.find(member => member.id === currentUser.id);
-        if (updatedUser) {
-          // Update current user with latest data
-          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-          console.log('Current user data updated in Dashboard');
-        }
+      if (updatedUser) {
+        // Update current user with latest data
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        console.log('Current user data updated in Dashboard');
+      }
       }
     };
 
@@ -288,7 +289,7 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
                 </button>
               )}
               <button onClick={() => setShowChangePassword(v => !v)} className="staff-manager-btn">
-                {showChangePassword ? 'Close Password' : 'Change Password'}
+                {showChangePassword ? 'Close Password' : (mustChangePassword ? 'Set New Password (Required)' : 'Change Password')}
               </button>
             </>
           )
@@ -356,9 +357,10 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
                       return;
                     }
                     staff[idx].password = newPasswordInput;
+                    staff[idx].mustChangePassword = false;
                     localStorage.setItem('rookiesTimeStaff', JSON.stringify(staff));
                     // Update currentUser too
-                    const updatedUser = { ...currentUser, password: newPasswordInput };
+                    const updatedUser = { ...currentUser, password: newPasswordInput, mustChangePassword: false };
                     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
                     setPasswordStatus('✅ Password updated successfully.');
                     setTimeout(() => setPasswordStatus(''), 3000);

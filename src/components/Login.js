@@ -9,6 +9,9 @@ const Login = ({ onLogin, refreshTrigger }) => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [showReset, setShowReset] = useState(false);
+  const [resetData, setResetData] = useState({ username: '', email: '', newPassword: '', confirm: '' });
+  const [resetStatus, setResetStatus] = useState('');
   const [availableUsers, setAvailableUsers] = useState([]);
 
   // Use centralized default staff data
@@ -121,6 +124,11 @@ const Login = ({ onLogin, refreshTrigger }) => {
       );
 
       if (user) {
+        // Enforce mustChangePassword flow
+        if (user.mustChangePassword) {
+          setError('You must change your temporary password. Please login with the temporary password and change it from Dashboard.');
+          // Continue login to allow change in dashboard
+        }
         // Store logged in user info
         localStorage.setItem('currentUser', JSON.stringify(user));
         onLogin(user);
@@ -188,6 +196,7 @@ const Login = ({ onLogin, refreshTrigger }) => {
           <p>Staff Login</p>
         </div>
 
+        {(
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="username">Username</label>
@@ -225,6 +234,7 @@ const Login = ({ onLogin, refreshTrigger }) => {
             Login
           </button>
         </form>
+        )}
 
 
       </div>

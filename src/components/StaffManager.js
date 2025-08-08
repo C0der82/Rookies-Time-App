@@ -26,6 +26,7 @@ const StaffManager = ({ onBack, onLogout }) => {
   const [editingRateValue, setEditingRateValue] = useState('');
   const [editingApproverValue, setEditingApproverValue] = useState('');
   const [editingRoleValue, setEditingRoleValue] = useState('standard');
+  const [editingPasswordValue, setEditingPasswordValue] = useState('');
 
   // Use centralized default staff data
   const defaultStaff = DEFAULT_STAFF_DATA;
@@ -179,6 +180,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingRateValue(member.hourlyRate || '');
     setEditingApproverValue('');
     setEditingRoleValue(member.role || 'standard');
+    setEditingPasswordValue('');
   };
 
   const handleSaveMember = (memberId) => {
@@ -193,6 +195,10 @@ const StaffManager = ({ onBack, onLogout }) => {
     const updatedStaff = staff.map(member => {
       if (member.id !== memberId) return member;
       const updated = { ...member, hourlyRate: newRate.toFixed(2), role: editingRoleValue };
+      if (editingPasswordValue && editingPasswordValue.trim() !== '') {
+        updated.password = editingPasswordValue;
+        updated.mustChangePassword = true;
+      }
       return updated;
     });
 
@@ -230,6 +236,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingRateValue('');
     setEditingApproverValue('');
     setEditingRoleValue('standard');
+    setEditingPasswordValue('');
     setSuccessMessage(`✅ Staff member updated successfully! Changes saved immediately.`);
     setTimeout(() => setSuccessMessage(''), 3000);
     
@@ -241,6 +248,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingRateValue('');
     setEditingApproverValue('');
     setEditingRoleValue('standard');
+    setEditingPasswordValue('');
   };
 
   const getAvailableApproversForEdit = () => [];
@@ -548,12 +556,9 @@ const StaffManager = ({ onBack, onLogout }) => {
                       <div className="rate-editor">
                         <input
                           type="text"
-                          value={member.password}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setStaff(prev => prev.map(m => m.id === member.id ? { ...m, password: val } : m));
-                          }}
-                          placeholder="New password"
+                          value={editingPasswordValue}
+                          onChange={(e) => setEditingPasswordValue(e.target.value)}
+                          placeholder="Temporary password"
                         />
                       </div>
                     ) : (
