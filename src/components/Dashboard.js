@@ -4,7 +4,7 @@ import Logo from './Logo';
 import Header from './Header';
 import * as XLSX from 'xlsx';
 
-const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
+const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [timesheet, setTimesheet] = useState({
     monday: { start: '', end: '', lunchOut: '', lunchIn: '', total: '', notes: '' },
@@ -270,10 +270,19 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
         onLogout={onLogout}
         showLogo={false}
         additionalActions={
-          isAdmin && (
-            <button onClick={onShowStaffManager} className="staff-manager-btn">
-              Manage Staff
-            </button>
+          (
+            <>
+              {isAdmin && (
+                <button onClick={onShowStaffManager} className="staff-manager-btn">
+                  Manage Staff
+                </button>
+              )}
+              {(isAdmin || isApprover) && (
+                <button onClick={onShowReports} className="staff-manager-btn">
+                  Reports
+                </button>
+              )}
+            </>
           )
         }
       />

@@ -49,6 +49,10 @@ export const useAppState = () => {
     setCurrentView('staff-manager');
   };
 
+  const showReports = () => {
+    setCurrentView('reports');
+  };
+
   const backToDashboard = () => {
     setCurrentView('dashboard');
     setRefreshTrigger(prev => prev + 1);
@@ -64,12 +68,17 @@ export const useAppState = () => {
       return { type: 'staff-manager', props: { onBack: backToDashboard, onLogout: logout } };
     }
 
+    if (currentView === 'reports') {
+      return { type: 'reports', props: { onBack: backToDashboard, onLogout: logout } };
+    }
+
     return {
       type: 'dashboard',
       props: {
         currentUser,
         onLogout: logout,
-        onShowStaffManager: showStaffManager
+        onShowStaffManager: showStaffManager,
+        onShowReports: showReports
       }
     };
   };
@@ -86,6 +95,7 @@ export const useAppState = () => {
     login,
     logout,
     showStaffManager,
+    showReports,
     backToDashboard,
     renderCurrentView
   };

@@ -3,6 +3,7 @@ import './App.css';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import StaffManager from './components/StaffManager';
+import Reports from './components/Reports';
 import { useAppState } from './hooks/useAppState';
 
 function App() {
@@ -25,6 +26,9 @@ function App() {
     case 'staff-manager':
       return <StaffManager {...props} />;
     
+    case 'reports':
+      return <Reports {...props} />;
+
     case 'dashboard':
       return <Dashboard {...props} />;
     
