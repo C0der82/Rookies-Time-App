@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import Logo from './Logo';
 import Header from './Header';
+import * as XLSX from 'xlsx';
 
 const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -147,6 +148,61 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
   const weekDates = getCurrentWeekDates();
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+  const exportCurrentTimesheetToExcel = () => {
+    try {
+      const weekKey = getCurrentWeekKey();
+      const headerRow = ['Day', 'Date', 'Start', 'Lunch Out', 'Lunch In', 'End', 'Total (h)', 'Notes'];
+
+      const rows = [
+        ['Name', currentUser?.name || ''],
+        ['Username', currentUser?.username || ''],
+        ['Role', currentUser?.role || ''],
+        ['Week starting', weekDates[0]?.toLocaleDateString() || ''],
+        [],
+        headerRow,
+      ];
+
+      const prettyDay = (d) => d.charAt(0).toUpperCase() + d.slice(1);
+
+      days.forEach((day, index) => {
+        const d = timesheet[day] || {};
+        rows.push([
+          prettyDay(day),
+          weekDates[index]?.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) || '',
+          d.start || '',
+          d.lunchOut || '',
+          d.lunchIn || '',
+          d.end || '',
+          d.total ? String(d.total).replace('h', '') : '',
+          d.notes || ''
+        ]);
+      });
+
+      rows.push([]);
+      rows.push(['Week Total', '', '', '', '', '', weekTotal.toFixed(2), '']);
+
+      const worksheet = XLSX.utils.aoa_to_sheet(rows);
+      worksheet['!cols'] = [
+        { wch: 12 }, // Day
+        { wch: 12 }, // Date
+        { wch: 10 }, // Start
+        { wch: 10 }, // Lunch Out
+        { wch: 10 }, // Lunch In
+        { wch: 10 }, // End
+        { wch: 10 }, // Total
+        { wch: 30 }, // Notes
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Timesheet');
+      const filename = `timesheet_${currentUser?.username || 'user'}_${weekKey}.xlsx`;
+      XLSX.writeFile(workbook, filename);
+    } catch (err) {
+      console.error('Error exporting timesheet to Excel:', err);
+      alert('There was an error creating the Excel file.');
+    }
+  };
+
   const handleSave = () => {
     if (currentUser) {
       const weekKey = getCurrentWeekKey();
@@ -176,7 +232,8 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
 
   const handleSubmit = () => {
     handleSave();
-    alert('Timesheet submitted successfully!');
+    exportCurrentTimesheetToExcel();
+    alert('Timesheet submitted successfully! A copy has been downloaded as Excel.');
   };
 
   const handleExport = () => {
