@@ -3,6 +3,8 @@ import './Dashboard.css';
 import Logo from './Logo';
 import Header from './Header';
 import * as XLSX from 'xlsx';
+import { auth } from '../config/firebase';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 
 const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -358,24 +360,36 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
                       setPasswordStatus('User record not found.');
                       return;
                     }
-                    if (staff[idx].password !== currentPasswordInput) {
-                      setPasswordStatus('Current password is incorrect.');
-                      return;
+                    // If Firebase available, reauth and update there first
+                    const doLocalUpdate = () => {
+                      staff[idx].password = newPasswordInput;
+                      staff[idx].mustChangePassword = false;
+                      localStorage.setItem('rookiesTimeStaff', JSON.stringify(staff));
+                      const updatedUser = { ...currentUser, password: newPasswordInput, mustChangePassword: false };
+                      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                      setPasswordStatus('✅ Password updated successfully.');
+                      setTimeout(() => setPasswordStatus(''), 3000);
+                      setCurrentPasswordInput('');
+                      setNewPasswordInput('');
+                      setConfirmPasswordInput('');
+                      window.dispatchEvent(new CustomEvent('staffDataUpdated', { detail: { action: 'updatePassword', username: updatedUser.username } }));
+                    };
+                    if (auth?.currentUser && currentUser?.email) {
+                      const cred = EmailAuthProvider.credential(currentUser.email, currentPasswordInput);
+                      reauthenticateWithCredential(auth.currentUser, cred)
+                        .then(() => updatePassword(auth.currentUser, newPasswordInput))
+                        .then(() => doLocalUpdate())
+                        .catch(() => {
+                          setPasswordStatus('Failed to update password with provider. Check current password.');
+                        });
+                    } else {
+                      // Fallback local verification
+                      if (staff[idx].password !== currentPasswordInput) {
+                        setPasswordStatus('Current password is incorrect.');
+                        return;
+                      }
+                      doLocalUpdate();
                     }
-                    staff[idx].password = newPasswordInput;
-                    staff[idx].mustChangePassword = false;
-                    localStorage.setItem('rookiesTimeStaff', JSON.stringify(staff));
-                    // Update currentUser too
-                    const updatedUser = { ...currentUser, password: newPasswordInput, mustChangePassword: false };
-                    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-                    setPasswordStatus('✅ Password updated successfully.');
-                    setTimeout(() => setPasswordStatus(''), 3000);
-                    // Clear fields
-                    setCurrentPasswordInput('');
-                    setNewPasswordInput('');
-                    setConfirmPasswordInput('');
-                    // Notify other components
-                    window.dispatchEvent(new CustomEvent('staffDataUpdated', { detail: { action: 'updatePassword', username: updatedUser.username } }));
                   }}
                 >
                   Save Password

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './Login.css';
 import Logo from './Logo';
 import { DEFAULT_STAFF_DATA, staffDataUtils } from '../utils/staffData';
+import { auth } from '../config/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const Login = ({ onLogin, refreshTrigger }) => {
   const [credentials, setCredentials] = useState({
@@ -114,42 +116,63 @@ const Login = ({ onLogin, refreshTrigger }) => {
       return;
     }
 
-    // Always get the latest staff data from localStorage
+    // Try Firebase first if configured
     const savedStaff = staffDataUtils.getStaffData();
-    if (savedStaff) {
-      const user = savedStaff.find(member => 
-        member.username === credentials.username && 
-        member.password === credentials.password &&
-        member.isActive
-      );
-
-      if (user) {
-        // Enforce mustChangePassword flow
-        if (user.mustChangePassword) {
-          setError('You must change your temporary password. Please login with the temporary password and change it from Dashboard.');
-          // Continue login to allow change in dashboard
-        }
-        // Store logged in user info
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        onLogin(user);
-      } else {
-        // Provide more detailed error message
-        const userExists = savedStaff.find(member => member.username === credentials.username);
-        if (userExists) {
-          if (!userExists.isActive) {
-            setError('Account is inactive. Contact administrator.');
-          } else {
-            setError('Invalid password for this username.');
+    const userRecord = savedStaff ? savedStaff.find(m => m.username === credentials.username) : null;
+    const email = userRecord?.email;
+    if (auth && email) {
+      signInWithEmailAndPassword(auth, email, credentials.password)
+        .then(() => {
+          if (!userRecord || !userRecord.isActive) {
+            setError('Account inactive or not found in staff database.');
+            return;
           }
+          localStorage.setItem('currentUser', JSON.stringify(userRecord));
+          onLogin(userRecord);
+        })
+        .catch(() => {
+          // Fallback to local auth if Firebase login fails
+          fallbackLocalLogin();
+        });
+      return;
+    }
+    // Fallback to local auth
+    fallbackLocalLogin();
+
+    function fallbackLocalLogin() {
+      const saved = staffDataUtils.getStaffData();
+      if (saved) {
+        const user = saved.find(member => 
+          member.username === credentials.username && 
+          member.password === credentials.password &&
+          member.isActive
+        );
+
+        if (user) {
+          if (user.mustChangePassword) {
+            setError('You must change your temporary password. Please change it from Dashboard.');
+          }
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          onLogin(user);
         } else {
-          setError('Username not found. Available users: ' + 
-            availableUsers.map(u => u.username).join(', '));
+        // Provide more detailed error message
+          const userExists = saved.find(member => member.username === credentials.username);
+          if (userExists) {
+            if (!userExists.isActive) {
+              setError('Account is inactive. Contact administrator.');
+            } else {
+              setError('Invalid password for this username.');
+            }
+          } else {
+            setError('Username not found. Available users: ' + 
+              availableUsers.map(u => u.username).join(', '));
+          }
         }
-      }
-    } else {
+      } else {
       // If no staff data, create default and try again
       staffDataUtils.saveStaffData(defaultStaff);
       // Don't show error message - just silently create default data
+      }
     }
   };
 
