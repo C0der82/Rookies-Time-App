@@ -7,7 +7,6 @@ export const DEFAULT_STAFF_DATA = [
     username: 'johnsmith',
     password: 'Rookies123!',
     role: 'admin',
-    approver: '',
     hourlyRate: '18.50',
     isActive: true,
     createdAt: '2024-01-15T10:00:00.000Z'
@@ -18,8 +17,7 @@ export const DEFAULT_STAFF_DATA = [
     email: 'sarah.johnson@rookies.com',
     username: 'sarahj',
     password: 'password123',
-    role: 'approver',
-    approver: 'johnsmith',
+    role: 'admin',
     hourlyRate: '16.75',
     isActive: true,
     createdAt: '2024-01-20T14:30:00.000Z'
@@ -31,7 +29,6 @@ export const DEFAULT_STAFF_DATA = [
     username: 'mikew',
     password: 'password123',
     role: 'standard',
-    approver: 'sarahj',
     hourlyRate: '14.25',
     isActive: true,
     createdAt: '2024-02-01T09:15:00.000Z'
@@ -42,8 +39,7 @@ export const DEFAULT_STAFF_DATA = [
     email: 'lisa.davis@rookies.com',
     username: 'lisad',
     password: 'password123',
-    role: 'approver',
-    approver: 'johnsmith',
+    role: 'admin',
     hourlyRate: '15.50',
     isActive: true,
     createdAt: '2024-02-15T11:30:00.000Z'
@@ -55,7 +51,6 @@ export const DEFAULT_STAFF_DATA = [
     username: 'jonmuir',
     password: 'password123',
     role: 'admin',
-    approver: '',
     hourlyRate: '20.00',
     isActive: true,
     createdAt: '2024-08-08T19:40:00.000Z'

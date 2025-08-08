@@ -129,13 +129,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setTimeout(() => setSuccessMessage(''), 5000);
   };
 
-  const getAvailableApprovers = () => {
-    return staff.filter(member => 
-      (member.role === 'approver' || member.role === 'admin') && 
-      member.isActive && 
-      member.username !== newStaff.username
-    );
-  };
+  const getAvailableApprovers = () => [];
 
   const handleEditRate = (memberId, currentRate) => {
     setEditingMember(memberId);
@@ -183,7 +177,7 @@ const StaffManager = ({ onBack, onLogout }) => {
   const handleEditMember = (member) => {
     setEditingMember(member.id);
     setEditingRateValue(member.hourlyRate || '');
-    setEditingApproverValue(member.approver || '');
+    setEditingApproverValue('');
     setEditingRoleValue(member.role || 'standard');
   };
 
@@ -194,14 +188,13 @@ const StaffManager = ({ onBack, onLogout }) => {
       return;
     }
 
-    console.log('Saving member:', memberId, 'Rate:', newRate, 'Approver:', editingApproverValue);
+    console.log('Saving member:', memberId, 'Rate:', newRate, 'Role:', editingRoleValue);
 
     const updatedStaff = staff.map(member => 
       member.id === memberId 
         ? { 
             ...member, 
             hourlyRate: newRate.toFixed(2),
-            approver: editingApproverValue,
             role: editingRoleValue
           }
         : member
@@ -254,13 +247,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingRoleValue('standard');
   };
 
-  const getAvailableApproversForEdit = (currentMemberId) => {
-    return staff.filter(member => 
-      (member.role === 'approver' || member.role === 'admin') && 
-      member.isActive && 
-      member.id !== currentMemberId
-    );
-  };
+  const getAvailableApproversForEdit = () => [];
 
   const handleDeleteStaff = (id) => {
     if (window.confirm('Are you sure you want to delete this staff member?')) {
@@ -323,7 +310,6 @@ const StaffManager = ({ onBack, onLogout }) => {
   const getRoleDisplayName = (role) => {
     switch(role) {
       case 'standard': return 'Standard User';
-      case 'approver': return 'Approver';
       case 'admin': return 'Admin';
       default: return role;
     }
@@ -364,7 +350,7 @@ const StaffManager = ({ onBack, onLogout }) => {
           >
             <option value="all">All Roles</option>
             <option value="standard">Standard User</option>
-            <option value="approver">Approver</option>
+            
             <option value="admin">Admin</option>
           </select>
         </div>
@@ -464,21 +450,7 @@ const StaffManager = ({ onBack, onLogout }) => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label>Approver</label>
-                <select
-                  name="approver"
-                  value={newStaff.approver}
-                  onChange={handleInputChange}
-                >
-                  <option value="">No Approver (Admin/Approver)</option>
-                  {getAvailableApprovers().map(approver => (
-                    <option key={approver.username} value={approver.username}>
-                      {approver.name} ({approver.username})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Approver removed */}
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -526,7 +498,7 @@ const StaffManager = ({ onBack, onLogout }) => {
                 <th>Email</th>
                 <th>Username</th>
                 <th>Role</th>
-                <th>Approver</th>
+                
                 <th>Hourly Rate</th>
                 <th>Status</th>
                 <th>Created</th>
@@ -547,7 +519,7 @@ const StaffManager = ({ onBack, onLogout }) => {
                           onChange={(e) => setEditingRoleValue(e.target.value)}
                         >
                           <option value="standard">Standard User</option>
-                          <option value="approver">Approver</option>
+                          
                           <option value="admin">Admin</option>
                         </select>
                       </div>
@@ -557,31 +529,7 @@ const StaffManager = ({ onBack, onLogout }) => {
                       </span>
                     )}
                   </td>
-                  <td>
-                    {editingMember === member.id ? (
-                      <div className="approver-editor">
-                        <select
-                          value={editingApproverValue}
-                          onChange={(e) => setEditingApproverValue(e.target.value)}
-                        >
-                          <option value="">No Approver</option>
-                          {getAvailableApproversForEdit(member.id).map(approver => (
-                            <option key={approver.username} value={approver.username}>
-                              {approver.name} ({approver.username})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : (
-                      member.approver ? (
-                        <span className="approver-badge">
-                          {staff.find(s => s.username === member.approver)?.name || member.approver}
-                        </span>
-                      ) : (
-                        <span className="no-approver">-</span>
-                      )
-                    )}
-                  </td>
+                  
                   <td>
                     {editingMember === member.id ? (
                       <div className="rate-editor">

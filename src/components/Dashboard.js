@@ -83,7 +83,7 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
   };
 
   const isAdmin = currentUser?.role === 'admin';
-  const isApprover = currentUser?.role === 'approver';
+  const isApprover = false;
 
   const handleTimeChange = (day, field, value) => {
     setTimesheet(prev => {
@@ -277,7 +277,7 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
                   Manage Staff
                 </button>
               )}
-              {(isAdmin || isApprover) && (
+              {isAdmin && (
                 <button onClick={onShowReports} className="staff-manager-btn">
                   Reports
                 </button>
