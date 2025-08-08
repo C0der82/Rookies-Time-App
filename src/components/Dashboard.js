@@ -151,7 +151,18 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
   const exportCurrentTimesheetToExcel = () => {
     try {
       const weekKey = getCurrentWeekKey();
-      const headerRow = ['Day', 'Date', 'Start', 'Lunch Out', 'Lunch In', 'End', 'Total (h)', 'Notes'];
+      const headerRow = [
+        'Day',
+        'Date',
+        'Start',
+        'Lunch Out',
+        'Lunch In',
+        'End',
+        'Total (h)',
+        'Notes',
+        'Hourly Rate (£)',
+        'Cost (£)'
+      ];
 
       const rows = [
         ['Name', currentUser?.name || ''],
@@ -163,9 +174,16 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
       ];
 
       const prettyDay = (d) => d.charAt(0).toUpperCase() + d.slice(1);
+      const hourlyRate = currentUser?.hourlyRate ? parseFloat(currentUser.hourlyRate) : 0;
+      let totalCost = 0;
 
       days.forEach((day, index) => {
         const d = timesheet[day] || {};
+        const hoursStr = d.total ? String(d.total).replace('h', '') : '';
+        const hoursNum = hoursStr ? parseFloat(hoursStr) : 0;
+        const dayRate = hourlyRate || 0;
+        const dayCost = hoursNum * dayRate;
+        totalCost += dayCost;
         rows.push([
           prettyDay(day),
           weekDates[index]?.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) || '',
@@ -173,13 +191,15 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
           d.lunchOut || '',
           d.lunchIn || '',
           d.end || '',
-          d.total ? String(d.total).replace('h', '') : '',
-          d.notes || ''
+          hoursNum || '',
+          d.notes || '',
+          Number.isFinite(dayRate) ? Number(dayRate.toFixed(2)) : 0,
+          Number.isFinite(dayCost) ? Number(dayCost.toFixed(2)) : 0
         ]);
       });
 
       rows.push([]);
-      rows.push(['Week Total', '', '', '', '', '', weekTotal.toFixed(2), '']);
+      rows.push(['Week Total', '', '', '', '', '', Number(weekTotal.toFixed(2)), '', '', Number(totalCost.toFixed(2))]);
 
       const worksheet = XLSX.utils.aoa_to_sheet(rows);
       worksheet['!cols'] = [
@@ -191,6 +211,8 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
         { wch: 10 }, // End
         { wch: 10 }, // Total
         { wch: 30 }, // Notes
+        { wch: 14 }, // Hourly Rate (£)
+        { wch: 12 }, // Cost (£)
       ];
 
       const workbook = XLSX.utils.book_new();
@@ -232,33 +254,11 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
 
   const handleSubmit = () => {
     handleSave();
-    exportCurrentTimesheetToExcel();
-    alert('Timesheet submitted successfully! A copy has been downloaded as Excel.');
+    alert('Timesheet submitted successfully!');
   };
 
   const handleExport = () => {
-    if (isAdmin || isApprover) {
-      const allTimesheets = JSON.parse(localStorage.getItem('rookiesTimeTimesheets') || '{}');
-      const exportData = {
-        exportDate: new Date().toISOString(),
-        exportedBy: currentUser.username,
-        timesheets: allTimesheets
-      };
-      
-      // Create downloadable JSON file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `rookies_time_timesheets_${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
-      
-      alert('Timesheet data exported successfully!');
-    } else {
-      alert('Only Admins and Approvers can export timesheet data.');
-    }
+    exportCurrentTimesheetToExcel();
   };
 
   return (
@@ -382,11 +382,9 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager }) => {
           </div>
 
           <div className="timesheet-actions">
-            {(isAdmin || isApprover) && (
-              <button className="export-btn" onClick={handleExport}>
-                Export All Timesheets ▼
-              </button>
-            )}
+            <button className="export-btn" onClick={handleExport}>
+              Export to Excel
+            </button>
           </div>
         </div>
       </div>
