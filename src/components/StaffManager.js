@@ -25,6 +25,7 @@ const StaffManager = ({ onBack, onLogout }) => {
   const [editingMember, setEditingMember] = useState(null);
   const [editingRateValue, setEditingRateValue] = useState('');
   const [editingApproverValue, setEditingApproverValue] = useState('');
+  const [editingRoleValue, setEditingRoleValue] = useState('standard');
 
   // Use centralized default staff data
   const defaultStaff = DEFAULT_STAFF_DATA;
@@ -183,6 +184,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingMember(member.id);
     setEditingRateValue(member.hourlyRate || '');
     setEditingApproverValue(member.approver || '');
+    setEditingRoleValue(member.role || 'standard');
   };
 
   const handleSaveMember = (memberId) => {
@@ -199,7 +201,8 @@ const StaffManager = ({ onBack, onLogout }) => {
         ? { 
             ...member, 
             hourlyRate: newRate.toFixed(2),
-            approver: editingApproverValue
+            approver: editingApproverValue,
+            role: editingRoleValue
           }
         : member
     );
@@ -237,6 +240,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingMember(null);
     setEditingRateValue('');
     setEditingApproverValue('');
+    setEditingRoleValue('standard');
     setSuccessMessage(`✅ Staff member updated successfully! Changes saved immediately.`);
     setTimeout(() => setSuccessMessage(''), 3000);
     
@@ -247,6 +251,7 @@ const StaffManager = ({ onBack, onLogout }) => {
     setEditingMember(null);
     setEditingRateValue('');
     setEditingApproverValue('');
+    setEditingRoleValue('standard');
   };
 
   const getAvailableApproversForEdit = (currentMemberId) => {
@@ -535,9 +540,22 @@ const StaffManager = ({ onBack, onLogout }) => {
                   <td>{member.email}</td>
                   <td>{member.username}</td>
                   <td>
-                    <span className={`role-badge ${member.role}`}>
-                      {getRoleDisplayName(member.role)}
-                    </span>
+                    {editingMember === member.id ? (
+                      <div className="approver-editor">
+                        <select
+                          value={editingRoleValue}
+                          onChange={(e) => setEditingRoleValue(e.target.value)}
+                        >
+                          <option value="standard">Standard User</option>
+                          <option value="approver">Approver</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+                    ) : (
+                      <span className={`role-badge ${member.role}`}>
+                        {getRoleDisplayName(member.role)}
+                      </span>
+                    )}
                   </td>
                   <td>
                     {editingMember === member.id ? (
