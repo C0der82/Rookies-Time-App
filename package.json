@@ -1,0 +1,38 @@
+{
+  "name": "rookies_time",
+  "version": "1.0.0",
+  "description": "A Time sheet recording app for Rookie Rockstars",
+  "main": "index.js",
+  "scripts": {
+    "start": "PORT=3000 HOST=localhost react-scripts start",
+    "start:dev": "PORT=3000 HOST=localhost BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "keywords": [
+    "react",
+    "app",
+    "rookies"
+  ],
+  "author": "Jonathan Muir",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
