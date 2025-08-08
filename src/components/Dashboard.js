@@ -25,6 +25,12 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
   const mustChangePassword = currentUser?.mustChangePassword;
 
   useEffect(() => {
+    if (mustChangePassword) {
+      setShowChangePassword(true);
+    }
+  }, [mustChangePassword]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
