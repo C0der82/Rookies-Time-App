@@ -17,6 +17,11 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
   });
   const [weekTotal, setWeekTotal] = useState(0);
   const [saveStatus, setSaveStatus] = useState('');
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPasswordInput, setCurrentPasswordInput] = useState('');
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -282,6 +287,9 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
                   Reports
                 </button>
               )}
+              <button onClick={() => setShowChangePassword(v => !v)} className="staff-manager-btn">
+                {showChangePassword ? 'Close Password' : 'Change Password'}
+              </button>
             </>
           )
         }
@@ -291,6 +299,83 @@ const Dashboard = ({ currentUser, onLogout, onShowStaffManager, onShowReports })
         <Logo />
         
         <div className="timesheet-container">
+          {showChangePassword && (
+            <div className="add-staff-form" style={{ margin: '1rem', borderColor: '#e9ecef' }}>
+              <h3>Change Password</h3>
+              <div className="form-row" style={{ gridTemplateColumns: '1fr' }}>
+                <div className="form-group">
+                  <label>Current Password</label>
+                  <input
+                    type="password"
+                    value={currentPasswordInput}
+                    onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>New Password</label>
+                  <input
+                    type="password"
+                    value={newPasswordInput}
+                    onChange={(e) => setNewPasswordInput(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmPasswordInput}
+                    onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                  />
+                </div>
+              </div>
+              {passwordStatus && (
+                <div className="save-status">{passwordStatus}</div>
+              )}
+              <div className="form-actions">
+                <button
+                  className="save-btn"
+                  onClick={() => {
+                    setPasswordStatus('');
+                    if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput) {
+                      setPasswordStatus('Please fill in all fields.');
+                      return;
+                    }
+                    if (newPasswordInput !== confirmPasswordInput) {
+                      setPasswordStatus('New passwords do not match.');
+                      return;
+                    }
+                    const staffRaw = localStorage.getItem('rookiesTimeStaff');
+                    const staff = staffRaw ? JSON.parse(staffRaw) : [];
+                    const idx = staff.findIndex(m => m.username === currentUser?.username);
+                    if (idx === -1) {
+                      setPasswordStatus('User record not found.');
+                      return;
+                    }
+                    if (staff[idx].password !== currentPasswordInput) {
+                      setPasswordStatus('Current password is incorrect.');
+                      return;
+                    }
+                    staff[idx].password = newPasswordInput;
+                    localStorage.setItem('rookiesTimeStaff', JSON.stringify(staff));
+                    // Update currentUser too
+                    const updatedUser = { ...currentUser, password: newPasswordInput };
+                    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                    setPasswordStatus('✅ Password updated successfully.');
+                    setTimeout(() => setPasswordStatus(''), 3000);
+                    // Clear fields
+                    setCurrentPasswordInput('');
+                    setNewPasswordInput('');
+                    setConfirmPasswordInput('');
+                    // Notify other components
+                    window.dispatchEvent(new CustomEvent('staffDataUpdated', { detail: { action: 'updatePassword', username: updatedUser.username } }));
+                  }}
+                >
+                  Save Password
+                </button>
+                <button className="cancel-btn" onClick={() => setShowChangePassword(false)}>Cancel</button>
+              </div>
+            </div>
+          )}
           <div className="timesheet-header">
             <div className="user-avatar">
               <span>{currentUser?.name?.split(' ').map(n => n[0]).join('')}</span>

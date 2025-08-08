@@ -190,15 +190,11 @@ const StaffManager = ({ onBack, onLogout }) => {
 
     console.log('Saving member:', memberId, 'Rate:', newRate, 'Role:', editingRoleValue);
 
-    const updatedStaff = staff.map(member => 
-      member.id === memberId 
-        ? { 
-            ...member, 
-            hourlyRate: newRate.toFixed(2),
-            role: editingRoleValue
-          }
-        : member
-    );
+    const updatedStaff = staff.map(member => {
+      if (member.id !== memberId) return member;
+      const updated = { ...member, hourlyRate: newRate.toFixed(2), role: editingRoleValue };
+      return updated;
+    });
 
     console.log('Updated staff data:', updatedStaff);
     
@@ -500,6 +496,7 @@ const StaffManager = ({ onBack, onLogout }) => {
                 <th>Role</th>
                 
                 <th>Hourly Rate</th>
+                <th>Password</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Actions</th>
@@ -544,6 +541,23 @@ const StaffManager = ({ onBack, onLogout }) => {
                       </div>
                     ) : (
                       `£${member.hourlyRate || '0.00'}`
+                    )}
+                  </td>
+                  <td>
+                    {editingMember === member.id ? (
+                      <div className="rate-editor">
+                        <input
+                          type="text"
+                          value={member.password}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setStaff(prev => prev.map(m => m.id === member.id ? { ...m, password: val } : m));
+                          }}
+                          placeholder="New password"
+                        />
+                      </div>
+                    ) : (
+                      <span className="no-approver">••••••••</span>
                     )}
                   </td>
                   <td>
